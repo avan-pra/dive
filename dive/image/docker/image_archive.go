@@ -261,6 +261,11 @@ func (img *ImageArchive) ToImage() (*image.Image, error) {
 func ExtractFromImage(tarFile io.ReadCloser, l string, p string) error {
 	tarReader := tar.NewReader(tarFile)
 
+	docker_image_layer := l + "/layer.tar"
+	// Couldn't test the following one
+	oci_image_layer := "blobs/sha256/" + l
+	podman_image_layer := l
+
 	for {
 		header, err := tarReader.Next()
 
@@ -277,7 +282,7 @@ func ExtractFromImage(tarFile io.ReadCloser, l string, p string) error {
 
 		switch header.Typeflag {
 		case tar.TypeReg:
-			if name == l {
+			if name == docker_image_layer || name == oci_image_layer || name == podman_image_layer {
 				err = extractInner(tar.NewReader(tarReader), p)
 				if err != nil {
 					return err
