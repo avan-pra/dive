@@ -2,6 +2,7 @@ package docker
 
 import (
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/wagoodman/dive/dive/image"
@@ -32,5 +33,15 @@ func (r *archiveResolver) Build(args []string) (*image.Image, error) {
 }
 
 func (r *archiveResolver) Extract(id string, l string, p string) error {
-	return fmt.Errorf("not implemented")
+
+	reader, err := os.Open(id)
+	if err != nil {
+		return err
+	}
+
+	if err := ExtractFromImage(io.NopCloser(reader), l, p); err == nil {
+		return nil
+	}
+
+	return fmt.Errorf("unable to extract from image '%s': %+v", id, err)
 }
